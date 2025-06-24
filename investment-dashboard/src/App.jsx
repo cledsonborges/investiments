@@ -31,19 +31,22 @@ function App() {
   const [selectedPeriod, setSelectedPeriod] = useState('30 dias');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedApp, setSelectedApp] = useState(null);
-  const [appsData, setAppsData] = useState([]); // Estado para armazenar os dados da API
+  const [appsData, setAppsData] = useState([]);
+  const [reviewsData, setReviewsData] = useState([]);
+  const [analysisData, setAnalysisData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const API_BASE_URL = 'https://bff-analyse.vercel.app/api';
 
   useEffect(() => {
     const fetchApps = async () => {
       try {
-        const response = await fetch('https://bff-analyse.vercel.app/api/apps');
+        const response = await fetch(`${API_BASE_URL}/apps`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        // Adicionar um ID único para cada app, se não houver
         const appsWithIds = data.map((app, index) => ({ ...app, id: app.id || index + 1 }));
         setAppsData(appsWithIds);
       } catch (error) {
@@ -56,35 +59,82 @@ function App() {
     fetchApps();
   }, []);
 
-  // Dados mockados para reviews e sugestões, pois a API de apps não os fornece
-  const mockReviewsAndSuggestions = {
-    recentReviews: [
-      { id: 1, user: 'João S.', app: 'Itaú Unibanco', appId: 3, rating: 5, text: 'Excelente app, muito fácil de usar...', sentiment: 'positive', time: '2 min', version: '4.1.2' },
-      { id: 2, user: 'Maria L.', app: 'Iti by Itaú', appId: 4, rating: 4, text: 'Gosto muito das funcionalidades...', sentiment: 'positive', time: '5 min', version: '1.9.7' },
-      { id: 3, user: 'Carlos M.', app: 'Itaú Empresas', appId: 1, rating: 2, text: 'App está muito lento ultimamente...', sentiment: 'negative', time: '8 min', version: '3.2.1' },
-      { id: 4, user: 'Ana P.', app: 'Itaú Personnalité', appId: 2, rating: 5, text: 'Perfeito para minhas necessidades...', sentiment: 'positive', time: '12 min', version: '2.8.4' },
-      { id: 5, user: 'Pedro R.', app: 'Itaú Unibanco', appId: 3, rating: 3, text: 'Poderia ter mais funcionalidades...', sentiment: 'neutral', time: '15 min', version: '4.1.2' },
-      { id: 6, user: 'Lucia F.', app: 'Iti by Itaú', appId: 4, rating: 5, text: 'Muito prático para transferências...', sentiment: 'positive', time: '20 min', version: '1.9.7' },
-      { id: 7, user: 'Roberto K.', app: 'Itaú Empresas', appId: 1, rating: 4, text: 'Bom para gestão empresarial...', sentiment: 'positive', time: '25 min', version: '3.2.1' },
-      { id: 8, user: 'Sandra M.', app: 'Itaú Personnalité', appId: 2, rating: 5, text: 'Atendimento exclusivo é excelente...', sentiment: 'positive', time: '30 min', version: '2.8.4' },
-      { id: 9, user: 'Fernando G.', app: 'Ion Itaú', appId: 5, rating: 4, text: 'Ótimo para investimentos, interface clara.', sentiment: 'positive', time: '35 min', version: '1.0.0' },
-      { id: 10, user: 'Camila H.', app: 'Ion Itaú', appId: 5, rating: 2, text: 'Tive dificuldades para encontrar algumas opções.', sentiment: 'negative', time: '40 min', version: '1.0.0' }
-    ],
-    aiSuggestions: [
-      { id: 1, title: 'Melhorar Performance de Login', priority: 'Alta', category: 'Performance', description: 'Usuários relatam lentidão no login', appId: 3 },
-      { id: 2, title: 'Adicionar Biometria Facial', priority: 'Média', category: 'Funcionalidade', description: 'Solicitação frequente nos reviews', appId: 1 },
-      { id: 3, title: 'Redesign da Tela Inicial', priority: 'Baixa', category: 'UX', description: 'Interface pode ser mais intuitiva', appId: 4 },
-      { id: 4, title: 'Otimizar Carregamento', priority: 'Alta', category: 'Performance', description: 'App demora para carregar', appId: 2 },
-      { id: 5, title: 'Melhorar Notificações', priority: 'Média', category: 'UX', description: 'Usuários querem mais controle', appId: 3 },
-      { id: 6, title: 'Expandir Conteúdo Educacional', priority: 'Média', category: 'Conteúdo', description: 'Usuários pedem mais guias de investimento', appId: 5 }
-    ]
+  const fetchAppReviews = async (appId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/apps/${appId}/reviews?limit=20`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Erro ao buscar reviews:', error);
+      return [];
+    }
   };
 
-  const handleCollectData = () => {
+  const fetchAppAnalysis = async (appId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/apps/${appId}/analysis`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Erro ao buscar análise:', error);
+      return null;
+    }
+  };
+
+  const fetchAllReviews = async () => {
+    try {
+      const allReviews = [];
+      for (const app of appsData.slice(0, 5)) { // Limitar para não sobrecarregar
+        const reviews = await fetchAppReviews(app.app_id);
+        allReviews.push(...reviews);
+      }
+      return allReviews.slice(0, 20); // Limitar a 20 reviews mais recentes
+    } catch (error) {
+      console.error('Erro ao buscar todos os reviews:', error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    const loadReviewsData = async () => {
+      if (selectedApp) {
+        const reviews = await fetchAppReviews(selectedApp.app_id);
+        const analysis = await fetchAppAnalysis(selectedApp.app_id);
+        setReviewsData(reviews);
+        setAnalysisData(analysis);
+      } else if (appsData.length > 0) {
+        const allReviews = await fetchAllReviews();
+        setReviewsData(allReviews);
+        setAnalysisData(null);
+      }
+    };
+
+    loadReviewsData();
+  }, [selectedApp, appsData]);
+
+  const handleCollectData = async () => {
     setIsCollecting(true);
-    setTimeout(() => {
+    try {
+      if (selectedApp) {
+        const reviews = await fetchAppReviews(selectedApp.app_id);
+        const analysis = await fetchAppAnalysis(selectedApp.app_id);
+        setReviewsData(reviews);
+        setAnalysisData(analysis);
+      } else {
+        const allReviews = await fetchAllReviews();
+        setReviewsData(allReviews);
+      }
+    } catch (error) {
+      console.error('Erro ao coletar dados:', error);
+    } finally {
       setIsCollecting(false);
-    }, 3000);
+    }
   };
 
   const formatNumber = (num) => {
@@ -115,15 +165,23 @@ function App() {
     }
   };
 
-  // Filtrar dados baseado no app selecionado
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('pt-BR');
+    } catch {
+      return 'N/A';
+    }
+  };
+
   const getFilteredData = () => {
     if (!selectedApp) {
-      // Calcular métricas gerais com base nos appsData
       const totalApps = appsData.length;
-      const totalReviews = mockReviewsAndSuggestions.recentReviews.length; // Usar mock por enquanto
-      const totalRating = appsData.reduce((sum, app) => sum + app.rating, 0);
+      const totalReviews = reviewsData.length;
+      const totalRating = appsData.reduce((sum, app) => sum + (app.rating || 0), 0);
       const averageRating = totalApps > 0 ? (totalRating / totalApps).toFixed(1) : 0;
-      const positiveReviews = mockReviewsAndSuggestions.recentReviews.filter(r => r.sentiment === 'positive').length;
+      const positiveReviews = reviewsData.filter(r => r.sentiment === 'positive').length;
       const generalSentiment = totalReviews > 0 ? Math.round((positiveReviews / totalReviews) * 100) : 0;
 
       return {
@@ -131,27 +189,23 @@ function App() {
         totalReviews: totalReviews,
         averageRating: averageRating,
         positivesentiment: generalSentiment,
-        recentReviews: mockReviewsAndSuggestions.recentReviews,
-        aiSuggestions: mockReviewsAndSuggestions.aiSuggestions
+        recentReviews: reviewsData,
+        analysisData: null
       };
     }
 
-    const filteredReviews = mockReviewsAndSuggestions.recentReviews.filter(review => review.appId === selectedApp.id);
-    const filteredSuggestions = mockReviewsAndSuggestions.aiSuggestions.filter(suggestion => suggestion.appId === selectedApp.id);
-    
-    // Calcular métricas específicas do app
-    const appReviewsCount = filteredReviews.length;
-    const appRating = selectedApp.rating;
-    const positiveAppReviews = filteredReviews.filter(r => r.sentiment === 'positive').length;
+    const appReviewsCount = reviewsData.length;
+    const appRating = selectedApp.rating || 0;
+    const positiveAppReviews = reviewsData.filter(r => r.sentiment === 'positive').length;
     const appSentiment = appReviewsCount > 0 ? Math.round((positiveAppReviews / appReviewsCount) * 100) : 0;
 
     return {
       totalApps: 1,
       totalReviews: appReviewsCount,
       averageRating: appRating,
-      positivesentiment: appSentiment,
-      recentReviews: filteredReviews,
-      aiSuggestions: filteredSuggestions
+      positivesentiment: analysisData ? analysisData.positive_percentage : appSentiment,
+      recentReviews: reviewsData,
+      analysisData: analysisData
     };
   };
 
@@ -289,7 +343,7 @@ function App() {
                     }`}
                   >
                     {app.icon_url && <img src={app.icon_url} alt={app.name} className="h-5 w-5" />}
-                    <span>{app.name}</span>
+                    <span className="truncate">{app.name}</span>
                   </button>
                 ))}
               </div>
@@ -333,15 +387,15 @@ function App() {
                       <div className="flex items-center space-x-4 mt-3">
                         <Badge variant="outline" className="bg-white">
                           <Package className="h-3 w-3 mr-1" />
-                          v{selectedApp.version}
+                          v{selectedApp.current_version}
                         </Badge>
                         <Badge variant="outline" className="bg-white">
                           <Calendar className="h-3 w-3 mr-1" />
-                          {selectedApp.lastUpdate}
+                          {formatDate(selectedApp.last_updated)}
                         </Badge>
                         <Badge variant="outline" className="bg-white">
                           <Download className="h-3 w-3 mr-1" />
-                          {selectedApp.downloads}
+                          {formatNumber(selectedApp.total_reviews)} reviews
                         </Badge>
                         <Badge variant="outline" className="bg-white">
                           {selectedApp.category}
@@ -378,7 +432,12 @@ function App() {
                 <MessageSquare className="h-4 w-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-900">{formatNumber(filteredData.totalReviews)}</div>
+                <div className="text-2xl font-bold text-blue-900">
+                  {filteredData.analysisData ? 
+                    formatNumber(filteredData.analysisData.total_reviews) : 
+                    formatNumber(filteredData.totalReviews)
+                  }
+                </div>
                 <p className="text-xs text-blue-600 mt-1">
                   <TrendingUp className="inline h-3 w-3 mr-1" />
                   +12% vs período anterior
@@ -454,26 +513,50 @@ function App() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Positivo</span>
-                    <span className="text-sm font-medium text-green-600">{filteredData.positivesentiment}%</span>
+                    <span className="text-sm font-medium text-green-600">
+                      {filteredData.analysisData ? 
+                        filteredData.analysisData.positive_percentage : 
+                        filteredData.positivesentiment}%
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: `${filteredData.positivesentiment}%` }}></div>
+                    <div className="bg-green-500 h-2 rounded-full" style={{ 
+                      width: `${filteredData.analysisData ? 
+                        filteredData.analysisData.positive_percentage : 
+                        filteredData.positivesentiment}%` 
+                    }}></div>
                   </div>
                   
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Neutro</span>
-                    <span className="text-sm font-medium text-yellow-600">{Math.round((100 - filteredData.positivesentiment) * 0.7)}%</span>
+                    <span className="text-sm font-medium text-yellow-600">
+                      {filteredData.analysisData ? 
+                        filteredData.analysisData.neutral_percentage : 
+                        Math.round((100 - filteredData.positivesentiment) * 0.7)}%
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-yellow-500 h-2 rounded-full" style={{ width: `${Math.round((100 - filteredData.positivesentiment) * 0.7)}%` }}></div>
+                    <div className="bg-yellow-500 h-2 rounded-full" style={{ 
+                      width: `${filteredData.analysisData ? 
+                        filteredData.analysisData.neutral_percentage : 
+                        Math.round((100 - filteredData.positivesentiment) * 0.7)}%` 
+                    }}></div>
                   </div>
                   
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Negativo</span>
-                    <span className="text-sm font-medium text-red-600">{Math.round((100 - filteredData.positivesentiment) * 0.3)}%</span>
+                    <span className="text-sm font-medium text-red-600">
+                      {filteredData.analysisData ? 
+                        filteredData.analysisData.negative_percentage : 
+                        Math.round((100 - filteredData.positivesentiment) * 0.3)}%
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-red-500 h-2 rounded-full" style={{ width: `${Math.round((100 - filteredData.positivesentiment) * 0.3)}%` }}></div>
+                    <div className="bg-red-500 h-2 rounded-full" style={{ 
+                      width: `${filteredData.analysisData ? 
+                        filteredData.analysisData.negative_percentage : 
+                        Math.round((100 - filteredData.positivesentiment) * 0.3)}%` 
+                    }}></div>
                   </div>
                 </div>
               </CardContent>
@@ -503,8 +586,8 @@ function App() {
                               <User className="h-4 w-4 text-gray-500" />
                             </div>
                             <div>
-                              <p className="text-sm font-medium">{review.user}</p>
-                              <p className="text-xs text-gray-500">{review.app} v{review.version}</p>
+                              <p className="text-sm font-medium">{review.user_name || 'Usuário Anônimo'}</p>
+                              <p className="text-xs text-gray-500">{formatDate(review.date)}</p>
                             </div>
                           </div>
                           <div className="flex items-center space-x-2">
@@ -516,10 +599,9 @@ function App() {
                                 />
                               ))}
                             </div>
-                            <span className="text-xs text-gray-500">{review.time}</span>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-700 mb-2">{review.text}</p>
+                        <p className="text-sm text-gray-700 mb-2">{review.content}</p>
                         <Badge className={getSentimentColor(review.sentiment)}>
                           {review.sentiment === 'positive' ? 'Positivo' : 
                            review.sentiment === 'negative' ? 'Negativo' : 'Neutro'}
@@ -536,49 +618,44 @@ function App() {
               </CardContent>
             </Card>
 
-            {/* Backlog IA */}
+            {/* Análise de Sentimentos */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-lg font-semibold text-[#1E3A5F]">
-                  Sugestões da IA {selectedApp && `- ${selectedApp.name}`}
+                  Análise de Sentimentos {selectedApp && `- ${selectedApp.name}`}
                 </CardTitle>
                 <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                  {filteredData.aiSuggestions.length} Pendentes
+                  {filteredData.analysisData ? 'Dados Reais' : 'Sem Dados'}
                 </Badge>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {filteredData.aiSuggestions.length > 0 ? (
-                    filteredData.aiSuggestions.map((suggestion) => (
-                      <div key={suggestion.id} className="border border-gray-200 rounded-lg p-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <h4 className="text-sm font-medium text-gray-900">{suggestion.title}</h4>
-                          <Badge className={getPriorityColor(suggestion.priority)}>
-                            {suggestion.priority}
-                          </Badge>
+                  {filteredData.analysisData ? (
+                    <>
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-blue-900 mb-2">
+                          {filteredData.analysisData.avg_sentiment_score?.toFixed(1) || 'N/A'}
                         </div>
-                        <p className="text-xs text-gray-600 mb-2">{suggestion.description}</p>
-                        <div className="flex items-center justify-between">
-                          <Badge variant="outline" className="text-xs">
-                            {suggestion.category}
-                          </Badge>
-                          <div className="flex space-x-2">
-                            <Button size="sm" variant="outline" className="text-xs">
-                              <Eye className="h-3 w-3 mr-1" />
-                              Ver
-                            </Button>
-                            <Button size="sm" className="text-xs bg-[#4CAF50] hover:bg-[#45A049]">
-                              <Plus className="h-3 w-3 mr-1" />
-                              Adicionar
-                            </Button>
-                          </div>
+                        <p className="text-sm text-gray-600">Score Médio de Sentimento</p>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Total de Reviews:</span>
+                          <span className="font-medium">{filteredData.analysisData.total_reviews}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Última Atualização:</span>
+                          <span className="font-medium">{formatDate(filteredData.analysisData.last_updated)}</span>
                         </div>
                       </div>
-                    ))
+                    </>
                   ) : (
                     <div className="text-center text-gray-500 py-8">
                       <AlertTriangle className="h-12 w-12 mx-auto mb-2 text-gray-300" />
-                      <p>Nenhuma sugestão encontrada para este app</p>
+                      <p>Análise não disponível</p>
+                      <p className="text-sm">Clique em "Coletar Dados" para gerar análise</p>
                     </div>
                   )}
                 </div>
