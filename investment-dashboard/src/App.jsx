@@ -19,7 +19,10 @@ import {
   MessageSquare,
   ThumbsUp,
   ThumbsDown,
-  AlertTriangle
+  AlertTriangle,
+  ArrowLeft,
+  Calendar,
+  Package
 } from 'lucide-react';
 import './App.css';
 
@@ -30,22 +33,71 @@ const mockData = {
   averageRating: 4.2,
   positivesentiment: 78,
   apps: [
-    { id: 1, name: 'Itaú Empresas', rating: 4.3, reviews: 850000, icon: '🏢' },
-    { id: 2, name: 'Itaú Personnalité', rating: 4.5, reviews: 320000, icon: '💎' },
-    { id: 3, name: 'Itaú Unibanco', rating: 4.1, reviews: 1200000, icon: '🏦' },
-    { id: 4, name: 'Iti by Itaú', rating: 4.0, reviews: 130000, icon: '💳' }
+    { 
+      id: 1, 
+      name: 'Itaú Empresas', 
+      rating: 4.3, 
+      reviews: 850000, 
+      icon: '🏢',
+      version: '3.2.1',
+      lastUpdate: '2024-06-15',
+      downloads: '5M+',
+      category: 'Finanças',
+      description: 'App oficial do Itaú para empresas'
+    },
+    { 
+      id: 2, 
+      name: 'Itaú Personnalité', 
+      rating: 4.5, 
+      reviews: 320000, 
+      icon: '💎',
+      version: '2.8.4',
+      lastUpdate: '2024-06-10',
+      downloads: '1M+',
+      category: 'Finanças',
+      description: 'Banking exclusivo para clientes Personnalité'
+    },
+    { 
+      id: 3, 
+      name: 'Itaú Unibanco', 
+      rating: 4.1, 
+      reviews: 1200000, 
+      icon: '🏦',
+      version: '4.1.2',
+      lastUpdate: '2024-06-20',
+      downloads: '10M+',
+      category: 'Finanças',
+      description: 'App principal do Itaú Unibanco'
+    },
+    { 
+      id: 4, 
+      name: 'Iti by Itaú', 
+      rating: 4.0, 
+      reviews: 130000, 
+      icon: '💳',
+      version: '1.9.7',
+      lastUpdate: '2024-06-18',
+      downloads: '500K+',
+      category: 'Finanças',
+      description: 'Conta digital do Itaú'
+    }
   ],
   recentReviews: [
-    { id: 1, user: 'João S.', app: 'Itaú Unibanco', rating: 5, text: 'Excelente app, muito fácil de usar...', sentiment: 'positive', time: '2 min' },
-    { id: 2, user: 'Maria L.', app: 'Iti by Itaú', rating: 4, text: 'Gosto muito das funcionalidades...', sentiment: 'positive', time: '5 min' },
-    { id: 3, user: 'Carlos M.', app: 'Itaú Empresas', rating: 2, text: 'App está muito lento ultimamente...', sentiment: 'negative', time: '8 min' },
-    { id: 4, user: 'Ana P.', app: 'Itaú Personnalité', rating: 5, text: 'Perfeito para minhas necessidades...', sentiment: 'positive', time: '12 min' },
-    { id: 5, user: 'Pedro R.', app: 'Itaú Unibanco', rating: 3, text: 'Poderia ter mais funcionalidades...', sentiment: 'neutral', time: '15 min' }
+    { id: 1, user: 'João S.', app: 'Itaú Unibanco', appId: 3, rating: 5, text: 'Excelente app, muito fácil de usar...', sentiment: 'positive', time: '2 min', version: '4.1.2' },
+    { id: 2, user: 'Maria L.', app: 'Iti by Itaú', appId: 4, rating: 4, text: 'Gosto muito das funcionalidades...', sentiment: 'positive', time: '5 min', version: '1.9.7' },
+    { id: 3, user: 'Carlos M.', app: 'Itaú Empresas', appId: 1, rating: 2, text: 'App está muito lento ultimamente...', sentiment: 'negative', time: '8 min', version: '3.2.1' },
+    { id: 4, user: 'Ana P.', app: 'Itaú Personnalité', appId: 2, rating: 5, text: 'Perfeito para minhas necessidades...', sentiment: 'positive', time: '12 min', version: '2.8.4' },
+    { id: 5, user: 'Pedro R.', app: 'Itaú Unibanco', appId: 3, rating: 3, text: 'Poderia ter mais funcionalidades...', sentiment: 'neutral', time: '15 min', version: '4.1.2' },
+    { id: 6, user: 'Lucia F.', app: 'Iti by Itaú', appId: 4, rating: 5, text: 'Muito prático para transferências...', sentiment: 'positive', time: '20 min', version: '1.9.7' },
+    { id: 7, user: 'Roberto K.', app: 'Itaú Empresas', appId: 1, rating: 4, text: 'Bom para gestão empresarial...', sentiment: 'positive', time: '25 min', version: '3.2.1' },
+    { id: 8, user: 'Sandra M.', app: 'Itaú Personnalité', appId: 2, rating: 5, text: 'Atendimento exclusivo é excelente...', sentiment: 'positive', time: '30 min', version: '2.8.4' }
   ],
   aiSuggestions: [
-    { id: 1, title: 'Melhorar Performance de Login', priority: 'Alta', category: 'Performance', description: 'Usuários relatam lentidão no login' },
-    { id: 2, title: 'Adicionar Biometria Facial', priority: 'Média', category: 'Funcionalidade', description: 'Solicitação frequente nos reviews' },
-    { id: 3, title: 'Redesign da Tela Inicial', priority: 'Baixa', category: 'UX', description: 'Interface pode ser mais intuitiva' }
+    { id: 1, title: 'Melhorar Performance de Login', priority: 'Alta', category: 'Performance', description: 'Usuários relatam lentidão no login', appId: 3 },
+    { id: 2, title: 'Adicionar Biometria Facial', priority: 'Média', category: 'Funcionalidade', description: 'Solicitação frequente nos reviews', appId: 1 },
+    { id: 3, title: 'Redesign da Tela Inicial', priority: 'Baixa', category: 'UX', description: 'Interface pode ser mais intuitiva', appId: 4 },
+    { id: 4, title: 'Otimizar Carregamento', priority: 'Alta', category: 'Performance', description: 'App demora para carregar', appId: 2 },
+    { id: 5, title: 'Melhorar Notificações', priority: 'Média', category: 'UX', description: 'Usuários querem mais controle', appId: 3 }
   ]
 };
 
@@ -53,6 +105,7 @@ function App() {
   const [isCollecting, setIsCollecting] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('30 dias');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedApp, setSelectedApp] = useState(null);
 
   const handleCollectData = () => {
     setIsCollecting(true);
@@ -89,6 +142,41 @@ function App() {
     }
   };
 
+  // Filtrar dados baseado no app selecionado
+  const getFilteredData = () => {
+    if (!selectedApp) return mockData;
+
+    const filteredReviews = mockData.recentReviews.filter(review => review.appId === selectedApp.id);
+    const filteredSuggestions = mockData.aiSuggestions.filter(suggestion => suggestion.appId === selectedApp.id);
+    
+    // Calcular métricas específicas do app
+    const appReviews = filteredReviews.length;
+    const appRating = selectedApp.rating;
+    const positiveReviews = filteredReviews.filter(r => r.sentiment === 'positive').length;
+    const appSentiment = appReviews > 0 ? Math.round((positiveReviews / appReviews) * 100) : 0;
+
+    return {
+      ...mockData,
+      totalApps: 1,
+      totalReviews: selectedApp.reviews,
+      averageRating: appRating,
+      positivesentiment: appSentiment,
+      recentReviews: filteredReviews,
+      aiSuggestions: filteredSuggestions
+    };
+  };
+
+  const filteredData = getFilteredData();
+
+  const handleAppSelect = (app) => {
+    setSelectedApp(app);
+    setSidebarOpen(false);
+  };
+
+  const handleBackToGeneral = () => {
+    setSelectedApp(null);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -108,7 +196,14 @@ function App() {
                 <div className="w-8 h-8 bg-[#FF6B35] rounded-lg flex items-center justify-center font-bold">
                   I
                 </div>
-                <h1 className="text-xl font-bold">Analytics Apps Itaú</h1>
+                <div>
+                  <h1 className="text-xl font-bold">Analytics Apps Itaú</h1>
+                  {selectedApp && (
+                    <p className="text-sm text-blue-200">
+                      {selectedApp.icon} {selectedApp.name}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -121,6 +216,18 @@ function App() {
             </nav>
 
             <div className="flex items-center space-x-4">
+              {selectedApp && (
+                <Button
+                  onClick={handleBackToGeneral}
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/10"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Voltar
+                </Button>
+              )}
+              
               <select 
                 value={selectedPeriod}
                 onChange={(e) => setSelectedPeriod(e.target.value)}
@@ -161,15 +268,32 @@ function App() {
         <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out`}>
           <div className="p-6">
             <nav className="space-y-2">
-              <div className="font-semibold text-gray-900 mb-4">Dashboard Geral</div>
+              <div className="font-semibold text-gray-900 mb-4">
+                <button
+                  onClick={handleBackToGeneral}
+                  className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                    !selectedApp ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-100'
+                  }`}
+                >
+                  Dashboard Geral
+                </button>
+              </div>
               
               <div className="space-y-1">
                 <div className="font-medium text-gray-700 text-sm mb-2">Apps do Itaú</div>
                 {mockData.apps.map(app => (
-                  <a key={app.id} href="#" className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">
+                  <button
+                    key={app.id}
+                    onClick={() => handleAppSelect(app)}
+                    className={`w-full flex items-center space-x-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+                      selectedApp?.id === app.id 
+                        ? 'bg-blue-100 text-blue-800' 
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
                     <span>{app.icon}</span>
                     <span>{app.name}</span>
-                  </a>
+                  </button>
                 ))}
               </div>
 
@@ -199,18 +323,54 @@ function App() {
 
         {/* Main Content */}
         <main className="flex-1 p-6 lg:ml-0">
+          {/* Informações do App Selecionado */}
+          {selectedApp && (
+            <div className="mb-8">
+              <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+                <CardHeader>
+                  <div className="flex items-center space-x-4">
+                    <div className="text-4xl">{selectedApp.icon}</div>
+                    <div className="flex-1">
+                      <CardTitle className="text-2xl text-blue-900">{selectedApp.name}</CardTitle>
+                      <p className="text-blue-700 mt-1">{selectedApp.description}</p>
+                      <div className="flex items-center space-x-4 mt-3">
+                        <Badge variant="outline" className="bg-white">
+                          <Package className="h-3 w-3 mr-1" />
+                          v{selectedApp.version}
+                        </Badge>
+                        <Badge variant="outline" className="bg-white">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          {selectedApp.lastUpdate}
+                        </Badge>
+                        <Badge variant="outline" className="bg-white">
+                          <Download className="h-3 w-3 mr-1" />
+                          {selectedApp.downloads}
+                        </Badge>
+                        <Badge variant="outline" className="bg-white">
+                          {selectedApp.category}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+            </div>
+          )}
+
           {/* Métricas Gerais */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-green-800">Total de Apps</CardTitle>
+                <CardTitle className="text-sm font-medium text-green-800">
+                  {selectedApp ? 'App Selecionado' : 'Total de Apps'}
+                </CardTitle>
                 <Smartphone className="h-4 w-4 text-green-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-900">{mockData.totalApps}</div>
+                <div className="text-2xl font-bold text-green-900">{filteredData.totalApps}</div>
                 <p className="text-xs text-green-600 mt-1">
                   <TrendingUp className="inline h-3 w-3 mr-1" />
-                  +0% vs período anterior
+                  {selectedApp ? selectedApp.name : '+0% vs período anterior'}
                 </p>
               </CardContent>
             </Card>
@@ -221,7 +381,7 @@ function App() {
                 <MessageSquare className="h-4 w-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-900">{formatNumber(mockData.totalReviews)}</div>
+                <div className="text-2xl font-bold text-blue-900">{formatNumber(filteredData.totalReviews)}</div>
                 <p className="text-xs text-blue-600 mt-1">
                   <TrendingUp className="inline h-3 w-3 mr-1" />
                   +12% vs período anterior
@@ -235,12 +395,12 @@ function App() {
                 <Star className="h-4 w-4 text-orange-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-orange-900">{mockData.averageRating}</div>
+                <div className="text-2xl font-bold text-orange-900">{filteredData.averageRating}</div>
                 <div className="flex items-center mt-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star
                       key={star}
-                      className={`h-3 w-3 ${star <= Math.floor(mockData.averageRating) ? 'text-orange-500 fill-current' : 'text-gray-300'}`}
+                      className={`h-3 w-3 ${star <= Math.floor(filteredData.averageRating) ? 'text-orange-500 fill-current' : 'text-gray-300'}`}
                     />
                   ))}
                 </div>
@@ -253,12 +413,12 @@ function App() {
                 <ThumbsUp className="h-4 w-4 text-pink-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-pink-900">{mockData.positivesentiment}%</div>
+                <div className="text-2xl font-bold text-pink-900">{filteredData.positivesentiment}%</div>
                 <div className="flex items-center space-x-1 mt-1">
                   <div className="flex-1 bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-pink-500 h-2 rounded-full" 
-                      style={{ width: `${mockData.positivesentiment}%` }}
+                      style={{ width: `${filteredData.positivesentiment}%` }}
                     ></div>
                   </div>
                 </div>
@@ -271,14 +431,18 @@ function App() {
             {/* Gráfico de Evolução */}
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-[#1E3A5F]">Evolução de Reviews</CardTitle>
+                <CardTitle className="text-lg font-semibold text-[#1E3A5F]">
+                  Evolução de Reviews {selectedApp && `- ${selectedApp.name}`}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-64 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg flex items-center justify-center">
                   <div className="text-center text-gray-500">
                     <TrendingUp className="h-12 w-12 mx-auto mb-2" />
                     <p>Gráfico de evolução temporal</p>
-                    <p className="text-sm">Dados dos últimos {selectedPeriod}</p>
+                    <p className="text-sm">
+                      {selectedApp ? `Dados do ${selectedApp.name}` : `Dados dos últimos ${selectedPeriod}`}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -293,26 +457,26 @@ function App() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Positivo</span>
-                    <span className="text-sm font-medium text-green-600">78%</span>
+                    <span className="text-sm font-medium text-green-600">{filteredData.positivesentiment}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '78%' }}></div>
+                    <div className="bg-green-500 h-2 rounded-full" style={{ width: `${filteredData.positivesentiment}%` }}></div>
                   </div>
                   
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Neutro</span>
-                    <span className="text-sm font-medium text-yellow-600">15%</span>
+                    <span className="text-sm font-medium text-yellow-600">{Math.round((100 - filteredData.positivesentiment) * 0.7)}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-yellow-500 h-2 rounded-full" style={{ width: '15%' }}></div>
+                    <div className="bg-yellow-500 h-2 rounded-full" style={{ width: `${Math.round((100 - filteredData.positivesentiment) * 0.7)}%` }}></div>
                   </div>
                   
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Negativo</span>
-                    <span className="text-sm font-medium text-red-600">7%</span>
+                    <span className="text-sm font-medium text-red-600">{Math.round((100 - filteredData.positivesentiment) * 0.3)}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-red-500 h-2 rounded-full" style={{ width: '7%' }}></div>
+                    <div className="bg-red-500 h-2 rounded-full" style={{ width: `${Math.round((100 - filteredData.positivesentiment) * 0.3)}%` }}></div>
                   </div>
                 </div>
               </CardContent>
@@ -324,44 +488,53 @@ function App() {
             {/* Reviews Recentes */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-lg font-semibold text-[#1E3A5F]">Reviews Recentes</CardTitle>
+                <CardTitle className="text-lg font-semibold text-[#1E3A5F]">
+                  Reviews Recentes {selectedApp && `- ${selectedApp.name}`}
+                </CardTitle>
                 <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  Tempo Real
+                  {filteredData.recentReviews.length} Reviews
                 </Badge>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4 max-h-96 overflow-y-auto">
-                  {mockData.recentReviews.map((review) => (
-                    <div key={review.id} className="border-b border-gray-100 pb-4 last:border-b-0">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                            <User className="h-4 w-4 text-gray-500" />
+                  {filteredData.recentReviews.length > 0 ? (
+                    filteredData.recentReviews.map((review) => (
+                      <div key={review.id} className="border-b border-gray-100 pb-4 last:border-b-0">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                              <User className="h-4 w-4 text-gray-500" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">{review.user}</p>
+                              <p className="text-xs text-gray-500">{review.app} v{review.version}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-medium">{review.user}</p>
-                            <p className="text-xs text-gray-500">{review.app}</p>
+                          <div className="flex items-center space-x-2">
+                            <div className="flex">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={`h-3 w-3 ${star <= review.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'}`}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-xs text-gray-500">{review.time}</span>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="flex">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`h-3 w-3 ${star <= review.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'}`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-xs text-gray-500">{review.time}</span>
-                        </div>
+                        <p className="text-sm text-gray-700 mb-2">{review.text}</p>
+                        <Badge className={getSentimentColor(review.sentiment)}>
+                          {review.sentiment === 'positive' ? 'Positivo' : 
+                           review.sentiment === 'negative' ? 'Negativo' : 'Neutro'}
+                        </Badge>
                       </div>
-                      <p className="text-sm text-gray-700 mb-2">{review.text}</p>
-                      <Badge className={getSentimentColor(review.sentiment)}>
-                        {review.sentiment === 'positive' ? 'Positivo' : 
-                         review.sentiment === 'negative' ? 'Negativo' : 'Neutro'}
-                      </Badge>
+                    ))
+                  ) : (
+                    <div className="text-center text-gray-500 py-8">
+                      <MessageSquare className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                      <p>Nenhum review encontrado para este app</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -369,39 +542,48 @@ function App() {
             {/* Backlog IA */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-lg font-semibold text-[#1E3A5F]">Sugestões da IA</CardTitle>
+                <CardTitle className="text-lg font-semibold text-[#1E3A5F]">
+                  Sugestões da IA {selectedApp && `- ${selectedApp.name}`}
+                </CardTitle>
                 <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                  {mockData.aiSuggestions.length} Pendentes
+                  {filteredData.aiSuggestions.length} Pendentes
                 </Badge>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockData.aiSuggestions.map((suggestion) => (
-                    <div key={suggestion.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="text-sm font-medium text-gray-900">{suggestion.title}</h4>
-                        <Badge className={getPriorityColor(suggestion.priority)}>
-                          {suggestion.priority}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-gray-600 mb-2">{suggestion.description}</p>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="text-xs">
-                          {suggestion.category}
-                        </Badge>
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="outline" className="text-xs">
-                            <Eye className="h-3 w-3 mr-1" />
-                            Ver
-                          </Button>
-                          <Button size="sm" className="text-xs bg-[#4CAF50] hover:bg-[#45A049]">
-                            <Plus className="h-3 w-3 mr-1" />
-                            Adicionar
-                          </Button>
+                  {filteredData.aiSuggestions.length > 0 ? (
+                    filteredData.aiSuggestions.map((suggestion) => (
+                      <div key={suggestion.id} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <h4 className="text-sm font-medium text-gray-900">{suggestion.title}</h4>
+                          <Badge className={getPriorityColor(suggestion.priority)}>
+                            {suggestion.priority}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-gray-600 mb-2">{suggestion.description}</p>
+                        <div className="flex items-center justify-between">
+                          <Badge variant="outline" className="text-xs">
+                            {suggestion.category}
+                          </Badge>
+                          <div className="flex space-x-2">
+                            <Button size="sm" variant="outline" className="text-xs">
+                              <Eye className="h-3 w-3 mr-1" />
+                              Ver
+                            </Button>
+                            <Button size="sm" className="text-xs bg-[#4CAF50] hover:bg-[#45A049]">
+                              <Plus className="h-3 w-3 mr-1" />
+                              Adicionar
+                            </Button>
+                          </div>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center text-gray-500 py-8">
+                      <AlertTriangle className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                      <p>Nenhuma sugestão encontrada para este app</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
