@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Smartphone, 
-  Star, 
-  TrendingUp, 
-  Users, 
-  RefreshCw, 
-  Bell, 
+import {
+  Smartphone,
+  Star,
+  TrendingUp,
+  Users,
+  RefreshCw,
+  Bell,
   User,
   Menu,
   Search,
@@ -26,86 +26,59 @@ import {
 } from 'lucide-react';
 import './App.css';
 
-// Dados mockados para demonstração
-const mockData = {
-  totalApps: 4,
-  totalReviews: 2500000,
-  averageRating: 4.2,
-  positivesentiment: 78,
-  apps: [
-    { 
-      id: 1, 
-      name: 'Itaú Empresas', 
-      rating: 4.3, 
-      reviews: 850000, 
-      icon: '🏢',
-      version: '3.2.1',
-      lastUpdate: '2024-06-15',
-      downloads: '5M+',
-      category: 'Finanças',
-      description: 'App oficial do Itaú para empresas'
-    },
-    { 
-      id: 2, 
-      name: 'Itaú Personnalité', 
-      rating: 4.5, 
-      reviews: 320000, 
-      icon: '💎',
-      version: '2.8.4',
-      lastUpdate: '2024-06-10',
-      downloads: '1M+',
-      category: 'Finanças',
-      description: 'Banking exclusivo para clientes Personnalité'
-    },
-    { 
-      id: 3, 
-      name: 'Itaú Unibanco', 
-      rating: 4.1, 
-      reviews: 1200000, 
-      icon: '🏦',
-      version: '4.1.2',
-      lastUpdate: '2024-06-20',
-      downloads: '10M+',
-      category: 'Finanças',
-      description: 'App principal do Itaú Unibanco'
-    },
-    { 
-      id: 4, 
-      name: 'Iti by Itaú', 
-      rating: 4.0, 
-      reviews: 130000, 
-      icon: '💳',
-      version: '1.9.7',
-      lastUpdate: '2024-06-18',
-      downloads: '500K+',
-      category: 'Finanças',
-      description: 'Conta digital do Itaú'
-    }
-  ],
-  recentReviews: [
-    { id: 1, user: 'João S.', app: 'Itaú Unibanco', appId: 3, rating: 5, text: 'Excelente app, muito fácil de usar...', sentiment: 'positive', time: '2 min', version: '4.1.2' },
-    { id: 2, user: 'Maria L.', app: 'Iti by Itaú', appId: 4, rating: 4, text: 'Gosto muito das funcionalidades...', sentiment: 'positive', time: '5 min', version: '1.9.7' },
-    { id: 3, user: 'Carlos M.', app: 'Itaú Empresas', appId: 1, rating: 2, text: 'App está muito lento ultimamente...', sentiment: 'negative', time: '8 min', version: '3.2.1' },
-    { id: 4, user: 'Ana P.', app: 'Itaú Personnalité', appId: 2, rating: 5, text: 'Perfeito para minhas necessidades...', sentiment: 'positive', time: '12 min', version: '2.8.4' },
-    { id: 5, user: 'Pedro R.', app: 'Itaú Unibanco', appId: 3, rating: 3, text: 'Poderia ter mais funcionalidades...', sentiment: 'neutral', time: '15 min', version: '4.1.2' },
-    { id: 6, user: 'Lucia F.', app: 'Iti by Itaú', appId: 4, rating: 5, text: 'Muito prático para transferências...', sentiment: 'positive', time: '20 min', version: '1.9.7' },
-    { id: 7, user: 'Roberto K.', app: 'Itaú Empresas', appId: 1, rating: 4, text: 'Bom para gestão empresarial...', sentiment: 'positive', time: '25 min', version: '3.2.1' },
-    { id: 8, user: 'Sandra M.', app: 'Itaú Personnalité', appId: 2, rating: 5, text: 'Atendimento exclusivo é excelente...', sentiment: 'positive', time: '30 min', version: '2.8.4' }
-  ],
-  aiSuggestions: [
-    { id: 1, title: 'Melhorar Performance de Login', priority: 'Alta', category: 'Performance', description: 'Usuários relatam lentidão no login', appId: 3 },
-    { id: 2, title: 'Adicionar Biometria Facial', priority: 'Média', category: 'Funcionalidade', description: 'Solicitação frequente nos reviews', appId: 1 },
-    { id: 3, title: 'Redesign da Tela Inicial', priority: 'Baixa', category: 'UX', description: 'Interface pode ser mais intuitiva', appId: 4 },
-    { id: 4, title: 'Otimizar Carregamento', priority: 'Alta', category: 'Performance', description: 'App demora para carregar', appId: 2 },
-    { id: 5, title: 'Melhorar Notificações', priority: 'Média', category: 'UX', description: 'Usuários querem mais controle', appId: 3 }
-  ]
-};
-
 function App() {
   const [isCollecting, setIsCollecting] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('30 dias');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedApp, setSelectedApp] = useState(null);
+  const [appsData, setAppsData] = useState([]); // Estado para armazenar os dados da API
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchApps = async () => {
+      try {
+        const response = await fetch('https://bff-analyse.vercel.app/api/apps');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        // Adicionar um ID único para cada app, se não houver
+        const appsWithIds = data.map((app, index) => ({ ...app, id: app.id || index + 1 }));
+        setAppsData(appsWithIds);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApps();
+  }, []);
+
+  // Dados mockados para reviews e sugestões, pois a API de apps não os fornece
+  const mockReviewsAndSuggestions = {
+    recentReviews: [
+      { id: 1, user: 'João S.', app: 'Itaú Unibanco', appId: 3, rating: 5, text: 'Excelente app, muito fácil de usar...', sentiment: 'positive', time: '2 min', version: '4.1.2' },
+      { id: 2, user: 'Maria L.', app: 'Iti by Itaú', appId: 4, rating: 4, text: 'Gosto muito das funcionalidades...', sentiment: 'positive', time: '5 min', version: '1.9.7' },
+      { id: 3, user: 'Carlos M.', app: 'Itaú Empresas', appId: 1, rating: 2, text: 'App está muito lento ultimamente...', sentiment: 'negative', time: '8 min', version: '3.2.1' },
+      { id: 4, user: 'Ana P.', app: 'Itaú Personnalité', appId: 2, rating: 5, text: 'Perfeito para minhas necessidades...', sentiment: 'positive', time: '12 min', version: '2.8.4' },
+      { id: 5, user: 'Pedro R.', app: 'Itaú Unibanco', appId: 3, rating: 3, text: 'Poderia ter mais funcionalidades...', sentiment: 'neutral', time: '15 min', version: '4.1.2' },
+      { id: 6, user: 'Lucia F.', app: 'Iti by Itaú', appId: 4, rating: 5, text: 'Muito prático para transferências...', sentiment: 'positive', time: '20 min', version: '1.9.7' },
+      { id: 7, user: 'Roberto K.', app: 'Itaú Empresas', appId: 1, rating: 4, text: 'Bom para gestão empresarial...', sentiment: 'positive', time: '25 min', version: '3.2.1' },
+      { id: 8, user: 'Sandra M.', app: 'Itaú Personnalité', appId: 2, rating: 5, text: 'Atendimento exclusivo é excelente...', sentiment: 'positive', time: '30 min', version: '2.8.4' },
+      { id: 9, user: 'Fernando G.', app: 'Ion Itaú', appId: 5, rating: 4, text: 'Ótimo para investimentos, interface clara.', sentiment: 'positive', time: '35 min', version: '1.0.0' },
+      { id: 10, user: 'Camila H.', app: 'Ion Itaú', appId: 5, rating: 2, text: 'Tive dificuldades para encontrar algumas opções.', sentiment: 'negative', time: '40 min', version: '1.0.0' }
+    ],
+    aiSuggestions: [
+      { id: 1, title: 'Melhorar Performance de Login', priority: 'Alta', category: 'Performance', description: 'Usuários relatam lentidão no login', appId: 3 },
+      { id: 2, title: 'Adicionar Biometria Facial', priority: 'Média', category: 'Funcionalidade', description: 'Solicitação frequente nos reviews', appId: 1 },
+      { id: 3, title: 'Redesign da Tela Inicial', priority: 'Baixa', category: 'UX', description: 'Interface pode ser mais intuitiva', appId: 4 },
+      { id: 4, title: 'Otimizar Carregamento', priority: 'Alta', category: 'Performance', description: 'App demora para carregar', appId: 2 },
+      { id: 5, title: 'Melhorar Notificações', priority: 'Média', category: 'UX', description: 'Usuários querem mais controle', appId: 3 },
+      { id: 6, title: 'Expandir Conteúdo Educacional', priority: 'Média', category: 'Conteúdo', description: 'Usuários pedem mais guias de investimento', appId: 5 }
+    ]
+  };
 
   const handleCollectData = () => {
     setIsCollecting(true);
@@ -144,21 +117,37 @@ function App() {
 
   // Filtrar dados baseado no app selecionado
   const getFilteredData = () => {
-    if (!selectedApp) return mockData;
+    if (!selectedApp) {
+      // Calcular métricas gerais com base nos appsData
+      const totalApps = appsData.length;
+      const totalReviews = mockReviewsAndSuggestions.recentReviews.length; // Usar mock por enquanto
+      const totalRating = appsData.reduce((sum, app) => sum + app.rating, 0);
+      const averageRating = totalApps > 0 ? (totalRating / totalApps).toFixed(1) : 0;
+      const positiveReviews = mockReviewsAndSuggestions.recentReviews.filter(r => r.sentiment === 'positive').length;
+      const generalSentiment = totalReviews > 0 ? Math.round((positiveReviews / totalReviews) * 100) : 0;
 
-    const filteredReviews = mockData.recentReviews.filter(review => review.appId === selectedApp.id);
-    const filteredSuggestions = mockData.aiSuggestions.filter(suggestion => suggestion.appId === selectedApp.id);
+      return {
+        totalApps: totalApps,
+        totalReviews: totalReviews,
+        averageRating: averageRating,
+        positivesentiment: generalSentiment,
+        recentReviews: mockReviewsAndSuggestions.recentReviews,
+        aiSuggestions: mockReviewsAndSuggestions.aiSuggestions
+      };
+    }
+
+    const filteredReviews = mockReviewsAndSuggestions.recentReviews.filter(review => review.appId === selectedApp.id);
+    const filteredSuggestions = mockReviewsAndSuggestions.aiSuggestions.filter(suggestion => suggestion.appId === selectedApp.id);
     
     // Calcular métricas específicas do app
-    const appReviews = filteredReviews.length;
+    const appReviewsCount = filteredReviews.length;
     const appRating = selectedApp.rating;
-    const positiveReviews = filteredReviews.filter(r => r.sentiment === 'positive').length;
-    const appSentiment = appReviews > 0 ? Math.round((positiveReviews / appReviews) * 100) : 0;
+    const positiveAppReviews = filteredReviews.filter(r => r.sentiment === 'positive').length;
+    const appSentiment = appReviewsCount > 0 ? Math.round((positiveAppReviews / appReviewsCount) * 100) : 0;
 
     return {
-      ...mockData,
       totalApps: 1,
-      totalReviews: selectedApp.reviews,
+      totalReviews: appReviewsCount,
       averageRating: appRating,
       positivesentiment: appSentiment,
       recentReviews: filteredReviews,
@@ -176,6 +165,14 @@ function App() {
   const handleBackToGeneral = () => {
     setSelectedApp(null);
   };
+
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen">Carregando dados dos apps...</div>;
+  }
+
+  if (error) {
+    return <div className="flex justify-center items-center min-h-screen text-red-500">Erro ao carregar dados dos apps: {error.message}</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -200,7 +197,7 @@ function App() {
                   <h1 className="text-xl font-bold">Analytics Apps Itaú</h1>
                   {selectedApp && (
                     <p className="text-sm text-blue-200">
-                      {selectedApp.icon} {selectedApp.name}
+                      <img src={selectedApp.icon_url} alt={selectedApp.name} className="inline-block h-4 w-4 mr-1" /> {selectedApp.name}
                     </p>
                   )}
                 </div>
@@ -281,7 +278,7 @@ function App() {
               
               <div className="space-y-1">
                 <div className="font-medium text-gray-700 text-sm mb-2">Apps do Itaú</div>
-                {mockData.apps.map(app => (
+                {appsData.map(app => (
                   <button
                     key={app.id}
                     onClick={() => handleAppSelect(app)}
@@ -291,7 +288,7 @@ function App() {
                         : 'text-gray-600 hover:bg-gray-100'
                     }`}
                   >
-                    <span>{app.icon}</span>
+                    {app.icon_url && <img src={app.icon_url} alt={app.name} className="h-5 w-5" />}
                     <span>{app.name}</span>
                   </button>
                 ))}
@@ -329,7 +326,7 @@ function App() {
               <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
                 <CardHeader>
                   <div className="flex items-center space-x-4">
-                    <div className="text-4xl">{selectedApp.icon}</div>
+                    {selectedApp.icon_url && <img src={selectedApp.icon_url} alt={selectedApp.name} className="h-12 w-12" />}
                     <div className="flex-1">
                       <CardTitle className="text-2xl text-blue-900">{selectedApp.name}</CardTitle>
                       <p className="text-blue-700 mt-1">{selectedApp.description}</p>
