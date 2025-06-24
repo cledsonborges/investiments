@@ -37,17 +37,17 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const API_BASE_URL = 'https://bff-analyse.vercel.app/api';
+  const API_BASE_URL = 'https://qjh9ieceoxlv.manus.space/api';
 
   useEffect(() => {
     const fetchApps = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/apps`);
+        const response = await fetch(`${API_BASE_URL}/apps?query=itau&store=google_play`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        const appsWithIds = data.map((app, index) => ({ ...app, id: app.id || index + 1 }));
+        const appsWithIds = data.map((app, index) => ({ ...app, id: app.app_id || index + 1 }));
         setAppsData(appsWithIds);
       } catch (error) {
         setError(error);
@@ -61,7 +61,7 @@ function App() {
 
   const fetchAppReviews = async (appId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/apps/${appId}/reviews?limit=20`);
+      const response = await fetch(`${API_BASE_URL}/apps/${appId}/reviews?store=google_play&limit=20`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -75,7 +75,7 @@ function App() {
 
   const fetchAppAnalysis = async (appId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/apps/${appId}/analysis`);
+      const response = await fetch(`${API_BASE_URL}/apps/${appId}/analysis?store=google_play`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
