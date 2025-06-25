@@ -317,56 +317,95 @@ function App() {
       <div className="flex">
         {/* Sidebar */}
         <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out`}>
-          <div className="p-6">
-            <nav className="space-y-2">
-              <div className="font-semibold text-gray-900 mb-4">
+          <div className="p-4">
+            <nav className="space-y-1">
+              {/* Dashboard Geral */}
+              <div className="mb-6">
                 <button
                   onClick={handleBackToGeneral}
-                  className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                    !selectedApp ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-100'
+                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+                    !selectedApp ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   Dashboard Geral
                 </button>
               </div>
               
-              <div className="space-y-1">
-                <div className="font-medium text-gray-700 text-sm mb-2">Apps do Itaú</div>
-                {appsData.map((app, index) => (
+              {/* Categorias */}
+              <div className="mb-4">
+                <h3 className="text-sm font-medium text-gray-500 mb-3">Categorias</h3>
+                <div className="space-y-1">
                   <button
-                    key={app.app_id || index}
-                    onClick={() => handleAppSelect(app)}
-                    className={`w-full flex items-center space-x-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                      selectedApp?.app_id === app.app_id 
-                        ? 'bg-blue-100 text-blue-800' 
-                        : 'text-gray-600 hover:bg-gray-100'
+                    onClick={handleBackToGeneral}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${
+                      !selectedApp ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'
                     }`}
                   >
-                    {app.icon_url && <img src={app.icon_url} alt={app.name} className="h-5 w-5" />}
-                    <span className="truncate">{app.name}</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border border-blue-400 rounded flex items-center justify-center">
+                        <div className="w-2 h-2 bg-blue-400 rounded-sm"></div>
+                      </div>
+                      <span>Todos os Apps</span>
+                    </div>
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{appsData.length}</span>
                   </button>
-                ))}
+                  
+                  <button className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border border-gray-400 rounded-full"></div>
+                      <span>Investimentos</span>
+                    </div>
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">31</span>
+                  </button>
+                  
+                  <button className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border border-gray-400 rounded"></div>
+                      <span>Financeiro</span>
+                    </div>
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">6</span>
+                  </button>
+                </div>
               </div>
 
-              <div className="space-y-1 mt-6">
-                <div className="font-medium text-gray-700 text-sm mb-2">Analytics</div>
-                <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Sentimentos</a>
-                <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Performance</a>
-                <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Comparativos</a>
-              </div>
-
-              <div className="space-y-1 mt-6">
-                <div className="font-medium text-gray-700 text-sm mb-2">Reviews</div>
-                <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Últimas Reviews</a>
-                <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Análise de Sentimentos</a>
-                <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Palavras-chave</a>
-              </div>
-
-              <div className="space-y-1 mt-6">
-                <div className="font-medium text-gray-700 text-sm mb-2">Backlog IA</div>
-                <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Sugestões Automáticas</a>
-                <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Priorização</a>
-                <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Roadmap</a>
+              {/* Todos os Apps */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Todos os Apps</h3>
+                <div className="space-y-1">
+                  {appsData.map((app, index) => (
+                    <button
+                      key={app.app_id || index}
+                      onClick={() => handleAppSelect(app)}
+                      className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors group ${
+                        selectedApp?.app_id === app.app_id 
+                          ? 'bg-orange-50 text-orange-700 border border-orange-200' 
+                          : 'text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2 flex-1 min-w-0">
+                        {app.icon_url ? (
+                          <img src={app.icon_url} alt={app.name} className="h-5 w-5 rounded flex-shrink-0" />
+                        ) : (
+                          <div className="h-5 w-5 bg-blue-500 rounded flex-shrink-0 flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">
+                              {app.name ? app.name.charAt(0).toUpperCase() : 'A'}
+                            </span>
+                          </div>
+                        )}
+                        <span className="truncate text-left">{app.name || 'App sem nome'}</span>
+                      </div>
+                      <div className="flex items-center space-x-1 flex-shrink-0">
+                        <div className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <svg viewBox="0 0 12 12" fill="currentColor">
+                            <circle cx="6" cy="6" r="1"/>
+                            <circle cx="6" cy="3" r="1"/>
+                            <circle cx="6" cy="9" r="1"/>
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </nav>
           </div>
