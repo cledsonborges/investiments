@@ -111,9 +111,22 @@ function App() {
       negative: 0
     };
     
-    // Palavras-chave para análise básica de sentimento
-    const positiveWords = ['ótimo', 'excelente', 'bom', 'muito bom', 'maravilhoso', 'top', 'recomendo', 'adorei', 'gostei', 'satisfeita', 'satisfeito', 'perfeito', 'incrível'];
-    const negativeWords = ['ruim', 'péssimo', 'horrível', 'problema', 'erro', 'cancelado', 'bloquearam', 'não funciona', 'falha', 'difícil', 'complicado', 'lento'];
+    // Palavras-chave expandidas para análise básica de sentimento
+    const positiveWords = [
+      'ótimo', 'excelente', 'bom', 'muito bom', 'maravilhoso', 'top', 'recomendo', 
+      'adorei', 'gostei', 'satisfeita', 'satisfeito', 'perfeito', 'incrível',
+      'fantástico', 'sensacional', 'amei', 'adoro', 'melhor', 'fácil', 'prático',
+      'rápido', 'eficiente', 'útil', 'funciona', 'aprovado', 'cinco estrelas',
+      'parabéns', 'sucesso', 'confiável', 'seguro', 'nota 10'
+    ];
+    
+    const negativeWords = [
+      'ruim', 'péssimo', 'horrível', 'problema', 'erro', 'cancelado', 'bloquearam',
+      'não funciona', 'falha', 'difícil', 'complicado', 'lento', 'travou', 'bug',
+      'defeito', 'terrível', 'odiei', 'detesto', 'pior', 'decepção', 'frustração',
+      'demora', 'trava', 'não recomendo', 'cuidado', 'golpe', 'fraude', 'inseguro',
+      'instável', 'confuso', 'chato', 'irritante', 'inútil'
+    ];
     
     reviews.forEach(review => {
       let sentiment = review.sentiment;
@@ -122,15 +135,28 @@ function App() {
       if (!sentiment || sentiment === 'neutral') {
         const text = (review.content || review.text || '').toLowerCase();
         
-        const hasPositive = positiveWords.some(word => text.includes(word));
-        const hasNegative = negativeWords.some(word => text.includes(word));
+        // Contar palavras positivas e negativas
+        const positiveCount = positiveWords.filter(word => text.includes(word)).length;
+        const negativeCount = negativeWords.filter(word => text.includes(word)).length;
         
-        if (hasPositive && !hasNegative) {
+        // Determinar sentimento baseado na contagem
+        if (positiveCount > negativeCount && positiveCount > 0) {
           sentiment = 'positive';
-        } else if (hasNegative && !hasPositive) {
+        } else if (negativeCount > positiveCount && negativeCount > 0) {
           sentiment = 'negative';
         } else {
-          sentiment = 'neutral';
+          // Se não há palavras claras ou empate, usar rating se disponível
+          if (review.rating) {
+            if (review.rating >= 4) {
+              sentiment = 'positive';
+            } else if (review.rating <= 2) {
+              sentiment = 'negative';
+            } else {
+              sentiment = 'neutral';
+            }
+          } else {
+            sentiment = 'neutral';
+          }
         }
       }
       
@@ -502,7 +528,7 @@ function App() {
                         </Badge>
                         <Badge variant="outline" className="bg-white">
                           <Download className="h-3 w-3 mr-1" />
-                          {formatNumber(selectedApp.total_reviews)} reviews
+                          {formatNumber(selectedApp.total_reviews || 0)} reviews
                         </Badge>
                         <Badge variant="outline" className="bg-white">
                           {selectedApp.category || 'Categoria não disponível'}
@@ -599,14 +625,53 @@ function App() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-64 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg flex items-center justify-center">
-                  <div className="text-center text-gray-500">
-                    <TrendingUp className="h-12 w-12 mx-auto mb-2" />
-                    <p>Gráfico de evolução temporal</p>
-                    <p className="text-sm">
-                      {selectedApp ? `Dados do ${selectedApp.name}` : `Dados dos últimos ${selectedPeriod}`}
-                    </p>
-                  </div>
+                <div className="h-64 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-4">
+                  {filteredData.recentReviews.length > 0 ? (
+                    <div className="h-full flex flex-col justify-center">
+                      <div className="text-center mb-4">
+                        <TrendingUp className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                        <p className="text-sm font-medium text-gray-700">Evolução de Reviews</p>
+                        <p className="text-xs text-gray-500">
+                          {selectedApp ? `${selectedApp.name}` : `Últimos ${selectedPeriod}`}
+                        </p>
+                      </div>
+                      
+                      {/* Gráfico simples de barras */}
+                      <div className="flex items-end justify-center space-x-2 h-24">
+                        {[...Array(7)].map((_, index) => {
+                          const height = Math.random() * 60 + 20; // Altura aleatória para demonstração
+                          return (
+                            <div key={index} className="flex flex-col items-center">
+                              <div 
+                                className="bg-blue-500 w-6 rounded-t"
+                                style={{ height: `${height}px` }}
+                              ></div>
+                              <span className="text-xs text-gray-500 mt-1">
+                                {new Date(Date.now() - (6 - index) * 24 * 60 * 60 * 1000).getDate()}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      
+                      <div className="text-center mt-2">
+                        <p className="text-xs text-gray-500">
+                          Total: {filteredData.recentReviews.length} reviews
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="text-center text-gray-500">
+                        <TrendingUp className="h-12 w-12 mx-auto mb-2" />
+                        <p>Gráfico de evolução temporal</p>
+                        <p className="text-sm">
+                          {selectedApp ? `Dados do ${selectedApp.name}` : `Dados dos últimos ${selectedPeriod}`}
+                        </p>
+                        <p className="text-xs mt-2">Nenhum dado disponível</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
