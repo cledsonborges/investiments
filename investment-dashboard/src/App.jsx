@@ -138,6 +138,9 @@ function App() {
   };
 
   const formatNumber = (num) => {
+    if (num === undefined || num === null || isNaN(num)) {
+      return '0';
+    }
     if (num >= 1000000) {
       return (num / 1000000).toFixed(1) + 'M';
     }
@@ -181,7 +184,7 @@ function App() {
       const totalReviews = reviewsData.length;
       const totalRating = appsData.reduce((sum, app) => sum + (app.rating || 0), 0);
       const averageRating = totalApps > 0 ? (totalRating / totalApps).toFixed(1) : 0;
-      const positiveReviews = reviewsData.filter(r => r.sentiment === 'positive').length;
+      const positiveReviews = reviewsData.filter(r => r && r.sentiment === 'positive').length;
       const generalSentiment = totalReviews > 0 ? Math.round((positiveReviews / totalReviews) * 100) : 0;
 
       return {
@@ -196,14 +199,14 @@ function App() {
 
     const appReviewsCount = reviewsData.length;
     const appRating = selectedApp.rating || 0;
-    const positiveAppReviews = reviewsData.filter(r => r.sentiment === 'positive').length;
+    const positiveAppReviews = reviewsData.filter(r => r && r.sentiment === 'positive').length;
     const appSentiment = appReviewsCount > 0 ? Math.round((positiveAppReviews / appReviewsCount) * 100) : 0;
 
     return {
       totalApps: 1,
       totalReviews: appReviewsCount,
       averageRating: appRating,
-      positivesentiment: analysisData ? analysisData.positive_percentage : appSentiment,
+      positivesentiment: analysisData && analysisData.positive_percentage ? analysisData.positive_percentage : appSentiment,
       recentReviews: reviewsData,
       analysisData: analysisData
     };
@@ -419,14 +422,14 @@ function App() {
               <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
                 <CardHeader>
                   <div className="flex items-center space-x-4">
-                    {selectedApp.icon_url && <img src={selectedApp.icon_url} alt={selectedApp.name} className="h-12 w-12" />}
+                    {selectedApp.icon_url && <img src={selectedApp.icon_url} alt={selectedApp.name || 'App'} className="h-12 w-12" />}
                     <div className="flex-1">
-                      <CardTitle className="text-2xl text-blue-900">{selectedApp.name}</CardTitle>
-                      <p className="text-blue-700 mt-1">{selectedApp.description}</p>
+                      <CardTitle className="text-2xl text-blue-900">{selectedApp.name || 'Nome não disponível'}</CardTitle>
+                      <p className="text-blue-700 mt-1">{selectedApp.description || 'Descrição não disponível'}</p>
                       <div className="flex items-center space-x-4 mt-3">
                         <Badge variant="outline" className="bg-white">
                           <Package className="h-3 w-3 mr-1" />
-                          v{selectedApp.current_version}
+                          v{selectedApp.current_version || 'N/A'}
                         </Badge>
                         <Badge variant="outline" className="bg-white">
                           <Calendar className="h-3 w-3 mr-1" />
@@ -437,7 +440,7 @@ function App() {
                           {formatNumber(selectedApp.total_reviews)} reviews
                         </Badge>
                         <Badge variant="outline" className="bg-white">
-                          {selectedApp.category}
+                          {selectedApp.category || 'Categoria não disponível'}
                         </Badge>
                       </div>
                     </div>
