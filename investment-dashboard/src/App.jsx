@@ -40,7 +40,7 @@ function App() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard'); // Novo estado para controlar a aba ativa
 
-  const API_BASE_URL = 'https://bff-lojas.vercel.app';
+   const API_BASE_URL = 'https://bff-analyse.vercel.app';
 
   useEffect(() => {
     const fetchApps = async () => {
