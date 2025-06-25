@@ -18,3 +18,4 @@ export default defineConfig({
     allowedHosts: ['5173-iyk03r5mvczptngwhumv4-1deed40e.manusvm.computer']
   }
 })
+
