@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import BacklogAI from '@/components/BacklogAI';
+import ItauCompetitors from '@/components/ItauCompetitors';
 import {
   Smartphone,
   Star,
@@ -24,7 +25,8 @@ import {
   ArrowLeft,
   Calendar,
   Package,
-  Brain
+  Brain,
+  Target
 } from 'lucide-react';
 import './App.css';
 
@@ -39,6 +41,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard'); // Novo estado para controlar a aba ativa
+  const [showCompetitors, setShowCompetitors] = useState(false);
 
    const API_BASE_URL = 'https://bff-analyse.vercel.app';
 
@@ -310,11 +313,19 @@ function App() {
 
   const handleAppSelect = (app) => {
     setSelectedApp(app);
+    setShowCompetitors(false);
     setSidebarOpen(false);
   };
 
   const handleBackToGeneral = () => {
     setSelectedApp(null);
+    setShowCompetitors(false);
+  };
+
+  const handleShowCompetitors = () => {
+    setSelectedApp(null);
+    setShowCompetitors(true);
+    setSidebarOpen(false);
   };
 
   if (loading) {
@@ -351,6 +362,11 @@ function App() {
                       <img src={selectedApp.icon_url} alt={selectedApp.name} className="inline-block h-4 w-4 mr-1" /> {selectedApp.name}
                     </p>
                   )}
+                  {showCompetitors && (
+                    <p className="text-sm text-blue-200">
+                      <Target className="inline-block h-4 w-4 mr-1" /> Análise Competitiva
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -375,7 +391,7 @@ function App() {
             </nav>
 
             <div className="flex items-center space-x-4">
-              {selectedApp && (
+              {(selectedApp || showCompetitors) && (
                 <Button
                   onClick={handleBackToGeneral}
                   variant="ghost"
@@ -432,10 +448,22 @@ function App() {
                 <button
                   onClick={() => {setActiveTab('dashboard'); handleBackToGeneral();}}
                   className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                    activeTab === 'dashboard' && !selectedApp ? 'bg-[var(--color-lime-green)] text-[var(--color-green-dark)] border border-[var(--color-green)]' : 'text-gray-700 hover:bg-gray-50'
+                    activeTab === 'dashboard' && !selectedApp && !showCompetitors ? 'bg-[var(--color-lime-green)] text-[var(--color-green-dark)] border border-[var(--color-green)]' : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   Dashboard Geral
+                </button>
+                
+                <button
+                  onClick={handleShowCompetitors}
+                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors mt-2 ${
+                    showCompetitors ? 'bg-orange-100 text-orange-800 border border-orange-300' : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <Target className="h-4 w-4" />
+                    <span>Concorrentes Itaú</span>
+                  </div>
                 </button>
                 
                 <button
@@ -535,6 +563,8 @@ function App() {
         <main className="flex-1 p-6 lg:ml-0">
           {activeTab === 'backlog' ? (
             <BacklogAI selectedApp={selectedApp} appsData={appsData} />
+          ) : showCompetitors ? (
+            <ItauCompetitors />
           ) : (
             <>
               {/* Informações do App Selecionado */}
