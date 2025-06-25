@@ -332,12 +332,12 @@ function App() {
               
               <div className="space-y-1">
                 <div className="font-medium text-gray-700 text-sm mb-2">Apps do Itaú</div>
-                {appsData.map(app => (
+                {appsData.map((app, index) => (
                   <button
-                    key={app.id}
+                    key={app.app_id || index}
                     onClick={() => handleAppSelect(app)}
                     className={`w-full flex items-center space-x-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                      selectedApp?.id === app.id 
+                      selectedApp?.app_id === app.app_id 
                         ? 'bg-blue-100 text-blue-800' 
                         : 'text-gray-600 hover:bg-gray-100'
                     }`}
@@ -578,8 +578,8 @@ function App() {
               <CardContent>
                 <div className="space-y-4 max-h-96 overflow-y-auto">
                   {filteredData.recentReviews.length > 0 ? (
-                    filteredData.recentReviews.map((review) => (
-                      <div key={review.id} className="border-b border-gray-100 pb-4 last:border-b-0">
+                    filteredData.recentReviews.map((review, index) => (
+                      <div key={review.review_id || index} className="border-b border-gray-100 pb-4 last:border-b-0">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center space-x-2">
                             <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
