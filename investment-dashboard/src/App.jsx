@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import BacklogAI from '@/components/BacklogAI';
 import ItauCompetitors from '@/components/ItauCompetitors';
+import LoginForm from '@/components/LoginForm';
 import {
   Smartphone,
   Star,
@@ -26,7 +27,8 @@ import {
   Calendar,
   Package,
   Brain,
-  Target
+  Target,
+  LogOut
 } from 'lucide-react';
 import './App.css';
 
@@ -43,10 +45,73 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard'); // Novo estado para controlar a aba ativa
   const [showCompetitors, setShowCompetitors] = useState(false);
 
+  // Estados de autenticação
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  const [authToken, setAuthToken] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
    const API_BASE_URL = 'https://bff-analyse.vercel.app';
+
+  // Verificar autenticação ao carregar a aplicação
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('authToken');
+      const email = localStorage.getItem('userEmail');
+      
+      if (token && email) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/auth/verify`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            setIsAuthenticated(true);
+            setUser(data.user);
+            setAuthToken(token);
+          } else {
+            // Token inválido, limpar localStorage
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userEmail');
+          }
+        } catch (error) {
+          console.error('Erro ao verificar autenticação:', error);
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('userEmail');
+        }
+      }
+      
+      setAuthLoading(false);
+    };
+    
+    checkAuth();
+  }, []);
+
+  // Funções de autenticação
+  const handleLoginSuccess = (userData, token) => {
+    setIsAuthenticated(true);
+    setUser(userData);
+    setAuthToken(token);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userEmail');
+    setIsAuthenticated(false);
+    setUser(null);
+    setAuthToken(null);
+  };
 
   useEffect(() => {
     const fetchApps = async () => {
+      if (!isAuthenticated) return; // Só carregar se estiver autenticado
+      
       try {
         const response = await fetch(`${API_BASE_URL}/api/apps?query=itau&store=google_play`);
         if (!response.ok) {
@@ -63,7 +128,7 @@ function App() {
     };
 
     fetchApps();
-  }, []);
+  }, [isAuthenticated]); // Adicionar isAuthenticated como dependência
 
   const fetchAppReviews = async (appId) => {
     try {
@@ -328,6 +393,23 @@ function App() {
     setSidebarOpen(false);
   };
 
+  // Mostrar loading enquanto verifica autenticação
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-green)] mx-auto mb-4"></div>
+          <p className="text-gray-600">Verificando autenticação...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar tela de login se não estiver autenticado
+  if (!isAuthenticated) {
+    return <LoginForm onLoginSuccess={handleLoginSuccess} />;
+  }
+
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen">Carregando dados dos apps...</div>;
   }
@@ -430,8 +512,21 @@ function App() {
               <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
                 <Bell className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
-                <User className="h-5 w-5" />
+              
+              {/* Informações do usuário logado */}
+              <div className="flex items-center space-x-2 text-sm">
+                <User className="h-4 w-4" />
+                <span className="hidden md:inline">{user?.email}</span>
+              </div>
+              
+              <Button 
+                onClick={handleLogout}
+                variant="ghost" 
+                size="sm" 
+                className="text-white hover:bg-white/10"
+                title="Sair"
+              >
+                <LogOut className="h-5 w-5" />
               </Button>
             </div>
           </div>
