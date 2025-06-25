@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
+import itauIcon from '/itau_icon.png'; // Importa a imagem diretamente
 
 const LoginForm = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
@@ -68,7 +69,7 @@ const LoginForm = ({ onLoginSuccess }) => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src="/itau_icon.png" alt="Ícone Itaú" className="w-16 h-16 rounded-lg" />
+            <img src={itauIcon} alt="Ícone Itaú" className="w-16 h-16 rounded-lg" />
           </div>
           <CardTitle className="text-2xl font-bold text-[var(--color-green-dark)]">
             Analytics Apps Itaú
