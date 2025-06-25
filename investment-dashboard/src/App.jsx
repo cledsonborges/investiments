@@ -101,11 +101,70 @@ function App() {
     }
   };
 
+  // Função para calcular análise de sentimentos localmente
+  const calculateLocalSentimentAnalysis = (reviews) => {
+    if (!reviews || reviews.length === 0) return null;
+    
+    const sentimentCounts = {
+      positive: 0,
+      neutral: 0,
+      negative: 0
+    };
+    
+    // Palavras-chave para análise básica de sentimento
+    const positiveWords = ['ótimo', 'excelente', 'bom', 'muito bom', 'maravilhoso', 'top', 'recomendo', 'adorei', 'gostei', 'satisfeita', 'satisfeito', 'perfeito', 'incrível'];
+    const negativeWords = ['ruim', 'péssimo', 'horrível', 'problema', 'erro', 'cancelado', 'bloquearam', 'não funciona', 'falha', 'difícil', 'complicado', 'lento'];
+    
+    reviews.forEach(review => {
+      let sentiment = review.sentiment;
+      
+      // Se não há sentiment definido ou é neutro, tentar analisar o texto
+      if (!sentiment || sentiment === 'neutral') {
+        const text = (review.content || review.text || '').toLowerCase();
+        
+        const hasPositive = positiveWords.some(word => text.includes(word));
+        const hasNegative = negativeWords.some(word => text.includes(word));
+        
+        if (hasPositive && !hasNegative) {
+          sentiment = 'positive';
+        } else if (hasNegative && !hasPositive) {
+          sentiment = 'negative';
+        } else {
+          sentiment = 'neutral';
+        }
+      }
+      
+      if (sentiment === 'positive') {
+        sentimentCounts.positive++;
+      } else if (sentiment === 'negative') {
+        sentimentCounts.negative++;
+      } else {
+        sentimentCounts.neutral++;
+      }
+    });
+    
+    const total = reviews.length;
+    
+    return {
+      positive_percentage: Math.round((sentimentCounts.positive / total) * 100),
+      neutral_percentage: Math.round((sentimentCounts.neutral / total) * 100),
+      negative_percentage: Math.round((sentimentCounts.negative / total) * 100),
+      total_reviews: total,
+      source: 'local_calculation'
+    };
+  };
+
   useEffect(() => {
     const loadReviewsData = async () => {
       if (selectedApp) {
         const reviews = await fetchAppReviews(selectedApp.app_id);
-        const analysis = await fetchAppAnalysis(selectedApp.app_id);
+        let analysis = await fetchAppAnalysis(selectedApp.app_id);
+        
+        // Se a análise da API falhar, calcular localmente
+        if (!analysis && reviews.length > 0) {
+          analysis = calculateLocalSentimentAnalysis(reviews);
+        }
+        
         setReviewsData(reviews);
         setAnalysisData(analysis);
       } else if (appsData.length > 0) {
@@ -123,7 +182,13 @@ function App() {
     try {
       if (selectedApp) {
         const reviews = await fetchAppReviews(selectedApp.app_id);
-        const analysis = await fetchAppAnalysis(selectedApp.app_id);
+        let analysis = await fetchAppAnalysis(selectedApp.app_id);
+        
+        // Se a análise da API falhar, calcular localmente
+        if (!analysis && reviews.length > 0) {
+          analysis = calculateLocalSentimentAnalysis(reviews);
+        }
+        
         setReviewsData(reviews);
         setAnalysisData(analysis);
       } else {
@@ -206,7 +271,7 @@ function App() {
       totalApps: 1,
       totalReviews: appReviewsCount,
       averageRating: appRating,
-      positivesentiment: analysisData && analysisData.positive_percentage ? analysisData.positive_percentage : appSentiment,
+      positivesentiment: analysisData && analysisData.positive_percentage !== undefined ? analysisData.positive_percentage : appSentiment,
       recentReviews: reviewsData,
       analysisData: analysisData
     };
@@ -556,14 +621,14 @@ function App() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Positivo</span>
                     <span className="text-sm font-medium text-green-600">
-                      {filteredData.analysisData ? 
-                        filteredData.analysisData.positive_percentage : 
-                        filteredData.positivesentiment}%
+                      {filteredData.analysisData && filteredData.analysisData.positive_percentage !== undefined ? 
+                        `${filteredData.analysisData.positive_percentage}%` : 
+                        `${filteredData.positivesentiment}%`}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div className="bg-green-500 h-2 rounded-full" style={{ 
-                      width: `${filteredData.analysisData ? 
+                      width: `${filteredData.analysisData && filteredData.analysisData.positive_percentage !== undefined ? 
                         filteredData.analysisData.positive_percentage : 
                         filteredData.positivesentiment}%` 
                     }}></div>
@@ -572,14 +637,14 @@ function App() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Neutro</span>
                     <span className="text-sm font-medium text-yellow-600">
-                      {filteredData.analysisData ? 
-                        filteredData.analysisData.neutral_percentage : 
-                        Math.round((100 - filteredData.positivesentiment) * 0.7)}%
+                      {filteredData.analysisData && filteredData.analysisData.neutral_percentage !== undefined ? 
+                        `${filteredData.analysisData.neutral_percentage}%` : 
+                        `${Math.round((100 - filteredData.positivesentiment) * 0.7)}%`}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div className="bg-yellow-500 h-2 rounded-full" style={{ 
-                      width: `${filteredData.analysisData ? 
+                      width: `${filteredData.analysisData && filteredData.analysisData.neutral_percentage !== undefined ? 
                         filteredData.analysisData.neutral_percentage : 
                         Math.round((100 - filteredData.positivesentiment) * 0.7)}%` 
                     }}></div>
@@ -588,14 +653,14 @@ function App() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Negativo</span>
                     <span className="text-sm font-medium text-red-600">
-                      {filteredData.analysisData ? 
-                        filteredData.analysisData.negative_percentage : 
-                        Math.round((100 - filteredData.positivesentiment) * 0.3)}%
+                      {filteredData.analysisData && filteredData.analysisData.negative_percentage !== undefined ? 
+                        `${filteredData.analysisData.negative_percentage}%` : 
+                        `${Math.round((100 - filteredData.positivesentiment) * 0.3)}%`}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div className="bg-red-500 h-2 rounded-full" style={{ 
-                      width: `${filteredData.analysisData ? 
+                      width: `${filteredData.analysisData && filteredData.analysisData.negative_percentage !== undefined ? 
                         filteredData.analysisData.negative_percentage : 
                         Math.round((100 - filteredData.positivesentiment) * 0.3)}%` 
                     }}></div>
