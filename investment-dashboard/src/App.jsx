@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import ItauCompetitors from './components/ItauCompetitors';
 import {
   Smartphone,
   Star,
@@ -22,7 +23,8 @@ import {
   AlertTriangle,
   ArrowLeft,
   Calendar,
-  Package
+  Package,
+  Target
 } from 'lucide-react';
 import './App.css';
 
@@ -31,6 +33,7 @@ function App() {
   const [selectedPeriod, setSelectedPeriod] = useState('30 dias');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedApp, setSelectedApp] = useState(null);
+  const [showCompetitors, setShowCompetitors] = useState(false);
   const [appsData, setAppsData] = useState([]);
   const [reviewsData, setReviewsData] = useState([]);
   const [analysisData, setAnalysisData] = useState(null);
@@ -213,11 +216,19 @@ function App() {
 
   const handleAppSelect = (app) => {
     setSelectedApp(app);
+    setShowCompetitors(false);
     setSidebarOpen(false);
   };
 
   const handleBackToGeneral = () => {
     setSelectedApp(null);
+    setShowCompetitors(false);
+  };
+
+  const handleShowCompetitors = () => {
+    setSelectedApp(null);
+    setShowCompetitors(true);
+    setSidebarOpen(false);
   };
 
   if (loading) {
@@ -254,6 +265,11 @@ function App() {
                       <img src={selectedApp.icon_url} alt={selectedApp.name} className="inline-block h-4 w-4 mr-1" /> {selectedApp.name}
                     </p>
                   )}
+                  {showCompetitors && (
+                    <p className="text-sm text-blue-200">
+                      <Target className="inline-block h-4 w-4 mr-1" /> Análise Competitiva
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -267,7 +283,7 @@ function App() {
             </nav>
 
             <div className="flex items-center space-x-4">
-              {selectedApp && (
+              {(selectedApp || showCompetitors) && (
                 <Button
                   onClick={handleBackToGeneral}
                   variant="ghost"
@@ -323,10 +339,22 @@ function App() {
                 <button
                   onClick={handleBackToGeneral}
                   className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                    !selectedApp ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-100'
+                    !selectedApp && !showCompetitors ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-100'
                   }`}
                 >
                   Dashboard Geral
+                </button>
+              </div>
+
+              <div className="space-y-1 mb-6">
+                <button
+                  onClick={handleShowCompetitors}
+                  className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center ${
+                    showCompetitors ? 'bg-orange-100 text-orange-800' : 'hover:bg-gray-100'
+                  }`}
+                >
+                  <Target className="h-4 w-4 mr-2" />
+                  Concorrentes Itaú
                 </button>
               </div>
               
@@ -374,8 +402,13 @@ function App() {
 
         {/* Main Content */}
         <main className="flex-1 p-6 lg:ml-0">
-          {/* Informações do App Selecionado */}
-          {selectedApp && (
+          {/* Renderização condicional baseada no estado */}
+          {showCompetitors ? (
+            <ItauCompetitors />
+          ) : (
+            <>
+              {/* Informações do App Selecionado */}
+              {selectedApp && (
             <div className="mb-8">
               <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
                 <CardHeader>
@@ -662,6 +695,8 @@ function App() {
               </CardContent>
             </Card>
           </div>
+          </>
+          )}
         </main>
       </div>
 
