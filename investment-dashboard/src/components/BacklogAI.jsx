@@ -42,7 +42,7 @@ const BacklogAI = ({ selectedApp, appsData }) => {
   const [jiraResults, setJiraResults] = useState(null);
   const [error, setError] = useState(null);
 
-  const API_BASE_URL = 'https://bff-lojas.vercel.app';
+   const API_BASE_URL = 'https://bff-analyse.vercel.app';
 
   const analyzeAppBacklog = async () => {
     if (!selectedApp) {
