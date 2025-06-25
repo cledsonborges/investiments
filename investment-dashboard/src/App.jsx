@@ -40,12 +40,12 @@ function App() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard'); // Novo estado para controlar a aba ativa
 
-  const API_BASE_URL = 'https://bff-analyse.vercel.app/api';
+  const API_BASE_URL = 'https://bff-lojas-git-cledsonborges-patch-1-manus-projects-0c6318ee.vercel.app';
 
   useEffect(() => {
     const fetchApps = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/apps?query=itau&store=google_play`);
+        const response = await fetch(`${API_BASE_URL}/api/apps?query=itau&store=google_play`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -64,7 +64,7 @@ function App() {
 
   const fetchAppReviews = async (appId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/apps/${appId}/reviews?store=google_play&limit=20`);
+      const response = await fetch(`${API_BASE_URL}/api/apps/${appId}/reviews?store=google_play&limit=20`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -78,7 +78,7 @@ function App() {
 
   const fetchAppAnalysis = async (appId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/apps/${appId}/analysis?store=google_play`);
+      const response = await fetch(`${API_BASE_URL}/api/apps/${appId}/analysis?store=google_play`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

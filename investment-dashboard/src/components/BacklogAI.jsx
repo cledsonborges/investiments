@@ -42,7 +42,7 @@ const BacklogAI = ({ selectedApp, appsData }) => {
   const [jiraResults, setJiraResults] = useState(null);
   const [error, setError] = useState(null);
 
-  const API_BASE_URL = 'https://bff-analyse.vercel.app/api';
+  const API_BASE_URL = 'https://bff-lojas-git-cledsonborges-patch-1-manus-projects-0c6318ee.vercel.app';
 
   const analyzeAppBacklog = async () => {
     if (!selectedApp) {
@@ -54,17 +54,11 @@ const BacklogAI = ({ selectedApp, appsData }) => {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/backlog/analyze`, {
-        method: 'POST',
+      const response = await fetch(`${API_BASE_URL}/api/apps/${selectedApp.app_id}/backlog?store=google_play&limit=100`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          app_id: selectedApp.app_id,
-          store: 'google_play',
-          app_name: selectedApp.name,
-          limit: 100
-        })
+        }
       });
 
       if (!response.ok) {
@@ -73,11 +67,29 @@ const BacklogAI = ({ selectedApp, appsData }) => {
 
       const data = await response.json();
       
-      if (data.success) {
-        setBacklogData(data.backlog_data);
-      } else {
-        setError(data.message || 'Erro na análise do backlog');
-      }
+      // Adaptar a resposta da nova API para o formato esperado pelo frontend
+      const adaptedData = {
+        success: true,
+        backlog_data: {
+          summary: {
+            total_reviews_analyzed: data.total_reviews_processed || 0,
+            critical_issues_found: data.generated_backlog_items?.filter(item => item.priority === 'High').length || 0,
+            improvement_suggestions: data.generated_backlog_items?.filter(item => item.type === 'improvement').length || 0
+          },
+          backlog_items: data.generated_backlog_items?.map((item, index) => ({
+            title: item.description,
+            description: item.description,
+            category: item.type,
+            priority: item.priority,
+            estimated_effort: '3',
+            user_impact: 'Medium',
+            evidence: [`Baseado em análise de ${data.total_reviews_processed} reviews`],
+            acceptance_criteria: [`Implementar: ${item.description}`]
+          })) || []
+        }
+      };
+      
+      setBacklogData(adaptedData.backlog_data);
     } catch (error) {
       console.error('Erro ao analisar backlog:', error);
       setError(`Erro ao analisar backlog: ${error.message}`);
