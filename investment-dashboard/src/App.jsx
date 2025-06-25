@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import BacklogAI from '@/components/BacklogAI';
 import {
   Smartphone,
   Star,
@@ -22,7 +23,8 @@ import {
   AlertTriangle,
   ArrowLeft,
   Calendar,
-  Package
+  Package,
+  Brain
 } from 'lucide-react';
 import './App.css';
 
@@ -36,6 +38,7 @@ function App() {
   const [analysisData, setAnalysisData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('dashboard'); // Novo estado para controlar a aba ativa
 
   const API_BASE_URL = 'https://bff-analyse.vercel.app/api';
 
@@ -353,7 +356,18 @@ function App() {
             </div>
 
             <nav className="hidden lg:flex items-center space-x-6">
-              <a href="#" className="hover:text-[var(--color-orange-itau)] transition-colors">Dashboard</a>
+              <button 
+                onClick={() => setActiveTab('dashboard')}
+                className={`hover:text-[var(--color-orange-itau)] transition-colors ${activeTab === 'dashboard' ? 'text-[var(--color-orange-itau)]' : ''}`}
+              >
+                Dashboard
+              </button>
+              <button 
+                onClick={() => setActiveTab('backlog')}
+                className={`hover:text-[var(--color-orange-itau)] transition-colors ${activeTab === 'backlog' ? 'text-[var(--color-orange-itau)]' : ''}`}
+              >
+                Backlog IA
+              </button>
               <a href="#" className="hover:text-[var(--color-orange-itau)] transition-colors">Apps</a>
               <a href="#" className="hover:text-[var(--color-orange-itau)] transition-colors">Reviews</a>
               <a href="#" className="hover:text-[var(--color-orange-itau)] transition-colors">Relatórios</a>
@@ -416,12 +430,24 @@ function App() {
               {/* Dashboard Geral */}
               <div className="mb-6">
                 <button
-                  onClick={handleBackToGeneral}
+                  onClick={() => {setActiveTab('dashboard'); handleBackToGeneral();}}
                   className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                    !selectedApp ? 'bg-[var(--color-lime-green)] text-[var(--color-green-dark)] border border-[var(--color-green)]' : 'text-gray-700 hover:bg-gray-50'
+                    activeTab === 'dashboard' && !selectedApp ? 'bg-[var(--color-lime-green)] text-[var(--color-green-dark)] border border-[var(--color-green)]' : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   Dashboard Geral
+                </button>
+                
+                <button
+                  onClick={() => setActiveTab('backlog')}
+                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors mt-2 ${
+                    activeTab === 'backlog' ? 'bg-purple-100 text-purple-800 border border-purple-300' : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <Brain className="h-4 w-4" />
+                    <span>Backlog com IA</span>
+                  </div>
                 </button>
               </div>
               
@@ -507,8 +533,12 @@ function App() {
 
         {/* Main Content */}
         <main className="flex-1 p-6 lg:ml-0">
-          {/* Informações do App Selecionado */}
-          {selectedApp && (
+          {activeTab === 'backlog' ? (
+            <BacklogAI selectedApp={selectedApp} appsData={appsData} />
+          ) : (
+            <>
+              {/* Informações do App Selecionado */}
+              {selectedApp && (
             <div className="mb-8">
               <Card className="bg-gradient-to-r from-[var(--color-green)]/10 to-[var(--color-green)]/20 border-[var(--color-green)]">
                 <CardHeader>
@@ -834,6 +864,8 @@ function App() {
               </CardContent>
             </Card>
           </div>
+            </>
+          )}
         </main>
       </div>
 
