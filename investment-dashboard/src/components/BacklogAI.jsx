@@ -42,7 +42,7 @@ const BacklogAI = ({ selectedApp, appsData }) => {
   const [jiraResults, setJiraResults] = useState(null);
   const [error, setError] = useState(null);
 
-  const API_BASE_URL = 'https://bff-lojas-git-cledsonborges-patch-1-manus-projects-0c6318ee.vercel.app';
+  const API_BASE_URL = 'https://bff-lojas.vercel.app';
 
   const analyzeAppBacklog = async () => {
     if (!selectedApp) {
