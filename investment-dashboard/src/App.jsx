@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import GridLayout from './components/GridLayout';
 import {
   Smartphone,
   Star,
@@ -586,20 +585,6 @@ function App() {
                     ></div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Grid Layout Personalizado */}
-          <div className="mb-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-[#1E3A5F]">
-                  Análise Visual de Métricas
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <GridLayout />
               </CardContent>
             </Card>
           </div>
